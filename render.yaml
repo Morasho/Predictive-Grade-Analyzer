@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: predictive-grade-analyzer
+    env: python
+    buildCommand: pip install -r requirements.txt && python data/generate_sample.py && python main.py --task both --model both
+    startCommand: uvicorn api:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0

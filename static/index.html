@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Predictive Grade Analyzer</title>
+<style>
+  :root {
+    --bg:       #0d1117;
+    --surface:  #161b22;
+    --border:   #30363d;
+    --accent:   #1b998b;
+    --accent2:  #3dcfbf;
+    --text:     #e6edf3;
+    --muted:    #8b949e;
+    --pass:     #3fb950;
+    --avg:      #d29922;
+    --risk:     #f85149;
+    --radius:   10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; }
+
+  /* Header */
+  header { text-align: center; margin-bottom: 2.5rem; }
+  header h1 {
+    font-size: 2rem; font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: .4rem;
+  }
+  header p { color: var(--muted); font-size: .95rem; }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .card h2 {
+    font-size: 1rem; font-weight: 600;
+    color: var(--accent2); margin-bottom: 1.25rem;
+    display: flex; align-items: center; gap: .5rem;
+  }
+
+  /* Form grid */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+  .field label {
+    display: block; font-size: .8rem;
+    color: var(--muted); margin-bottom: .35rem; letter-spacing: .03em;
+  }
+  .field input, .field select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: .55rem .75rem;
+    font-size: .9rem;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+
+  /* Model selector row */
+  .model-row {
+    display: flex; align-items: center; gap: 1rem;
+    margin-top: 1.25rem; flex-wrap: wrap;
+  }
+  .model-row label { color: var(--muted); font-size: .85rem; }
+  .model-row select {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text);
+    padding: .45rem .75rem; font-size: .88rem; outline: none;
+  }
+
+  /* Submit button */
+  .btn {
+    margin-top: 1.5rem; width: 100%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; border-radius: var(--radius);
+    color: #fff; font-size: 1rem; font-weight: 600;
+    padding: .85rem; cursor: pointer;
+    transition: opacity .2s, transform .1s;
+  }
+  .btn:hover { opacity: .88; }
+  .btn:active { transform: scale(.98); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+  /* Results */
+  #results { display: none; }
+
+  .grade-badge {
+    display: inline-block;
+    font-size: 1.5rem; font-weight: 800;
+    padding: .5rem 1.4rem;
+    border-radius: var(--radius);
+    letter-spacing: .05em;
+  }
+  .grade-Pass    { background: rgba(63,185,80,.15); color: var(--pass);  border: 1px solid var(--pass);  }
+  .grade-Average { background: rgba(210,153,34,.15); color: var(--avg);  border: 1px solid var(--avg);  }
+  .grade-At-Risk { background: rgba(248,81,73,.15);  color: var(--risk); border: 1px solid var(--risk); }
+
+  .score-row {
+    display: flex; align-items: center; gap: 1.5rem;
+    margin-top: 1.25rem; flex-wrap: wrap;
+  }
+  .score-big { font-size: 3rem; font-weight: 800; color: var(--text); line-height: 1; }
+  .score-label { color: var(--muted); font-size: .85rem; margin-top: .2rem; }
+
+  /* Confidence bars */
+  .conf-row {
+    display: flex; align-items: center; gap: .75rem;
+    margin-bottom: .6rem;
+  }
+  .conf-label { width: 72px; font-size: .85rem; color: var(--muted); text-align: right; }
+  .conf-bar-bg {
+    flex: 1; height: 8px; background: var(--border);
+    border-radius: 99px; overflow: hidden;
+  }
+  .conf-bar-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width .6s ease;
+  }
+  .conf-pct { width: 44px; font-size: .82rem; color: var(--text); text-align: right; }
+
+  /* SHAP factors */
+  .factors { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media(max-width:600px){ .factors { grid-template-columns: 1fr; } }
+
+  .factor-group h3 {
+    font-size: .8rem; font-weight: 600; letter-spacing: .08em;
+    margin-bottom: .75rem;
+    text-transform: uppercase;
+  }
+  .factor-group.helping h3 { color: var(--pass); }
+  .factor-group.hurting h3 { color: var(--risk); }
+
+  .factor-item {
+    display: flex; align-items: center; gap: .6rem;
+    margin-bottom: .5rem;
+  }
+  .factor-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .helping .factor-dot { background: var(--pass); }
+  .hurting .factor-dot { background: var(--risk); }
+
+  .factor-name { flex: 1; font-size: .83rem; color: var(--text); }
+  .factor-val  { font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* Spinner */
+  .spinner {
+    display: inline-block; width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    vertical-align: middle; margin-right: .5rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Error */
+  .error-box {
+    background: rgba(248,81,73,.1); border: 1px solid var(--risk);
+    border-radius: var(--radius); padding: 1rem; color: var(--risk);
+    font-size: .9rem;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>🎓 Predictive Grade Analyzer</h1>
+    <p>ML-powered student performance prediction using XGBoost &amp; Neural Networks</p>
+  </header>
+
+  <!-- Input Form -->
+  <div class="card">
+    <h2>📋 Student Profile</h2>
+    <div class="form-grid">
+
+      <div class="field">
+        <label>STUDY HOURS / WEEK</label>
+        <input type="number" id="study_hours" min="1" max="40" step="0.5" value="15" />
+      </div>
+      <div class="field">
+        <label>ATTENDANCE RATE (0 – 1)</label>
+        <input type="number" id="attendance_rate" min="0" max="1" step="0.01" value="0.85" />
+      </div>
+      <div class="field">
+        <label>PREVIOUS GPA (0 – 4)</label>
+        <input type="number" id="previous_gpa" min="0" max="4" step="0.1" value="3.0" />
+      </div>
+      <div class="field">
+        <label>ASSIGNMENTS COMPLETED (%)</label>
+        <input type="number" id="assignments_completed" min="50" max="100" step="1" value="85" />
+      </div>
+      <div class="field">
+        <label>TUTORING SESSIONS</label>
+        <input type="number" id="tutoring_sessions" min="0" max="20" step="1" value="3" />
+      </div>
+      <div class="field">
+        <label>SLEEP HOURS / NIGHT</label>
+        <input type="number" id="sleep_hours" min="4" max="10" step="0.5" value="7" />
+      </div>
+      <div class="field">
+        <label>PART-TIME JOB</label>
+        <select id="part_time_job">
+          <option value="0">No</option>
+          <option value="1">Yes</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>EXTRACURRICULARS</label>
+        <input type="number" id="extracurriculars" min="0" max="8" step="1" value="2" />
+      </div>
+      <div class="field">
+        <label>SOCIOECONOMIC INDEX (1 – 10)</label>
+        <input type="number" id="socioeconomic_index" min="1" max="10" step="0.5" value="6" />
+      </div>
+
+    </div>
+
+    <div class="model-row">
+      <label>MODEL</label>
+      <select id="model_name">
+        <option value="xgboost">XGBoost</option>
+        <option value="mlp">MLP Neural Network</option>
+      </select>
+    </div>
+
+    <button class="btn" id="predictBtn" onclick="runPrediction()">
+      Predict Performance
+    </button>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+
+    <!-- Grade + Score -->
+    <div class="card">
+      <h2>🎯 Prediction</h2>
+      <span id="gradeBadge" class="grade-badge"></span>
+      <div class="score-row">
+        <div>
+          <div class="score-big" id="scoreVal">—</div>
+          <div class="score-label">Predicted Score / 100</div>
+        </div>
+        <div style="flex:1; min-width:180px">
+          <div style="font-size:.8rem; color:var(--muted); margin-bottom:.6rem">Model used</div>
+          <div id="modelUsed" style="font-size:.9rem; color:var(--accent2)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confidence -->
+    <div class="card">
+      <h2>📊 Class Confidence</h2>
+      <div id="confidenceBars"></div>
+    </div>
+
+    <!-- SHAP Explanation -->
+    <div class="card">
+      <h2>🔍 What's Driving This Prediction?</h2>
+      <div class="factors">
+        <div class="factor-group helping">
+          <h3>✅ Helping</h3>
+          <div id="helpingFactors"></div>
+        </div>
+        <div class="factor-group hurting">
+          <h3>⚠️ Hurting</h3>
+          <div id="hurtingFactors"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="errorBox"></div>
+
+</div>
+
+<script>
+const gradeColors = { "Pass": "Pass", "Average": "Average", "At-Risk": "At-Risk" };
+
+async function runPrediction() {
+  const btn = document.getElementById("predictBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Predicting…';
+  document.getElementById("results").style.display = "none";
+  document.getElementById("errorBox").innerHTML = "";
+
+  const payload = {
+    study_hours_per_week:  parseFloat(document.getElementById("study_hours").value),
+    attendance_rate:       parseFloat(document.getElementById("attendance_rate").value),
+    previous_gpa:          parseFloat(document.getElementById("previous_gpa").value),
+    assignments_completed: parseFloat(document.getElementById("assignments_completed").value),
+    tutoring_sessions:     parseFloat(document.getElementById("tutoring_sessions").value),
+    sleep_hours:           parseFloat(document.getElementById("sleep_hours").value),
+    part_time_job:         parseInt(document.getElementById("part_time_job").value),
+    extracurriculars:      parseFloat(document.getElementById("extracurriculars").value),
+    socioeconomic_index:   parseFloat(document.getElementById("socioeconomic_index").value),
+    model_name:            document.getElementById("model_name").value,
+  };
+
+  try {
+    const res = await fetch("/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Prediction failed");
+    }
+
+    const data = await res.json();
+    renderResults(data);
+  } catch (e) {
+    document.getElementById("errorBox").innerHTML =
+      `<div class="error-box">⚠ ${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = "Predict Performance";
+  }
+}
+
+function renderResults(data) {
+  // Grade badge
+  const badge = document.getElementById("gradeBadge");
+  const gradeClass = (data.grade || "").replace("-", "-");
+  badge.textContent = data.grade;
+  badge.className = `grade-badge grade-${data.grade}`;
+
+  // Score
+  document.getElementById("scoreVal").textContent = data.score.toFixed(1);
+  document.getElementById("modelUsed").textContent = data.model_used.toUpperCase();
+
+  // Confidence bars
+  const confDiv = document.getElementById("confidenceBars");
+  confDiv.innerHTML = "";
+  const conf = data.confidence;
+  const sorted = Object.entries(conf).sort((a, b) => b[1] - a[1]);
+  for (const [cls, pct] of sorted) {
+    confDiv.innerHTML += `
+      <div class="conf-row">
+        <div class="conf-label">${cls}</div>
+        <div class="conf-bar-bg">
+          <div class="conf-bar-fill" style="width:${pct}%"></div>
+        </div>
+        <div class="conf-pct">${pct.toFixed(1)}%</div>
+      </div>`;
+  }
+
+  // SHAP factors
+  const expl = data.explanation?.top_factors;
+  if (expl) {
+    renderFactors("helpingFactors", expl.helping || []);
+    renderFactors("hurtingFactors", expl.hurting || []);
+  }
+
+  document.getElementById("results").style.display = "block";
+  document.getElementById("results").scrollIntoView({ behavior: "smooth" });
+}
+
+function renderFactors(containerId, factors) {
+  const el = document.getElementById(containerId);
+  if (!factors.length) {
+    el.innerHTML = '<div style="color:var(--muted); font-size:.82rem;">No significant factors</div>';
+    return;
+  }
+  el.innerHTML = factors.map(f => `
+    <div class="factor-item">
+      <div class="factor-dot"></div>
+      <div class="factor-name">${f.label}</div>
+      <div class="factor-val">${f.shap_value > 0 ? "+" : ""}${f.shap_value.toFixed(3)}</div>
+    </div>`).join("");
+}
+</script>
+</body>
+</html>
