@@ -487,6 +487,239 @@
   .export-bar p { font-size: 13px; color: var(--muted); }
   .export-bar p strong { color: var(--text); }
 
+  /* ---- CSV GUIDE ---- */
+  .csv-guide {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+    margin-bottom: 28px;
+  }
+  .csv-guide-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .csv-guide-header h2 {
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .csv-guide-header p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+  .columns-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .col-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .col-card.optional { border-style: dashed; }
+  .col-icon {
+    font-size: 16px;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+  .col-name {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent);
+    margin-bottom: 3px;
+  }
+  .col-card.optional .col-name { color: var(--muted); }
+  .col-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+  .col-range {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--border2);
+    margin-top: 3px;
+  }
+  .guide-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .guide-footer p { font-size: 12px; color: var(--muted); }
+  .guide-footer code {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--surface2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--text);
+  }
+  .sample-row {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+  }
+  .sample-row p {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .sample-row code {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  /* ---- TREND / HISTORY ---- */
+  .trend-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .trend-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .trend-header h3 { font-size: 14px; font-weight: 600; }
+  .trend-header p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .trend-actions { display: flex; gap: 8px; }
+  .sessions-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .session-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-family: var(--mono);
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .session-chip:hover { border-color: var(--accent); color: var(--text); }
+  .session-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(0,229,160,0.08); }
+  .session-chip .chip-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .trend-chart-wrap { height: 200px; position: relative; }
+  .trend-student-list {
+    margin-top: 20px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .trend-student-list h4 {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+  }
+  .trend-student-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .trend-student-row:last-child { border-bottom: none; }
+  .trend-name { min-width: 130px; font-weight: 500; }
+  .trend-chips { display: flex; gap: 4px; flex: 1; flex-wrap: wrap; }
+  .trend-grade-dot {
+    width: 28px;
+    height: 20px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+  }
+  .trend-grade-dot.Pass    { background: var(--risk-green-bg); color: var(--risk-green); }
+  .trend-grade-dot.Average { background: var(--risk-amber-bg); color: var(--risk-amber); }
+  .trend-grade-dot.At-Risk { background: var(--risk-red-bg);   color: var(--risk-red);   }
+  .trend-grade-dot.missing { background: var(--surface2); color: var(--muted); }
+  .trend-arrow {
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+  }
+  .trend-arrow.up   { color: var(--risk-green); }
+  .trend-arrow.down { color: var(--risk-red); }
+  .trend-arrow.flat { color: var(--muted); }
+  .no-history {
+    text-align: center;
+    padding: 32px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .session-label-input {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    padding: 6px 10px;
+    border-radius: 7px;
+    font-family: var(--font);
+    font-size: 12px;
+    outline: none;
+    width: 130px;
+  }
+  .session-label-input:focus { border-color: var(--accent); }
+  .trend-summary-chips {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .trend-stat {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  .trend-stat span { font-family: var(--mono); font-weight: 600; margin-right: 4px; }
+  .trend-stat.improved span { color: var(--risk-green); }
+  .trend-stat.declined span { color: var(--risk-red); }
+  .trend-stat.stable span   { color: var(--muted); }
+
+  /* ---- EMPTY STATE ---- */
   /* ---- EMPTY STATE ---- */
   .empty-state {
     text-align: center;
@@ -580,12 +813,115 @@
     <p id="loading-msg">Analyzing students...</p>
   </div>
 
+  <!-- CSV GUIDE -->
+  <div class="csv-guide" id="csv-guide">
+    <div class="csv-guide-header">
+      <div>
+        <h2>📋 How to prepare your CSV file</h2>
+        <p>Your file needs these columns — one row per student. Column order doesn't matter.</p>
+      </div>
+      <button class="btn btn-primary" onclick="downloadTemplate()">↓ Download ready-made template</button>
+    </div>
+
+    <div class="columns-grid">
+      <div class="col-card">
+        <span class="col-icon">👤</span>
+        <div>
+          <div class="col-name">student_name</div>
+          <div class="col-desc">Student's full name for display</div>
+          <div class="col-range">Optional — defaults to "Student 1, 2…"</div>
+        </div>
+      </div>
+      <div class="col-card">
+        <span class="col-icon">📚</span>
+        <div>
+          <div class="col-name">study_hours_per_week</div>
+          <div class="col-desc">How many hours the student studies per week</div>
+          <div class="col-range">Range: 1 – 40</div>
+        </div>
+      </div>
+      <div class="col-card">
+        <span class="col-icon">🏫</span>
+        <div>
+          <div class="col-name">attendance_rate</div>
+          <div class="col-desc">Fraction of classes attended</div>
+          <div class="col-range">Range: 0.0 – 1.0 &nbsp;(e.g. 0.85 = 85%)</div>
+        </div>
+      </div>
+      <div class="col-card">
+        <span class="col-icon">📊</span>
+        <div>
+          <div class="col-name">previous_gpa</div>
+          <div class="col-desc">GPA from the previous term</div>
+          <div class="col-range">Range: 0.0 – 4.0</div>
+        </div>
+      </div>
+      <div class="col-card">
+        <span class="col-icon">✅</span>
+        <div>
+          <div class="col-name">assignments_completed</div>
+          <div class="col-desc">Percentage of assignments submitted</div>
+          <div class="col-range">Range: 50 – 100</div>
+        </div>
+      </div>
+      <div class="col-card">
+        <span class="col-icon">🧑‍🏫</span>
+        <div>
+          <div class="col-name">tutoring_sessions</div>
+          <div class="col-desc">Number of tutoring sessions attended</div>
+          <div class="col-range">Range: 0 – 20</div>
+        </div>
+      </div>
+      <div class="col-card">
+        <span class="col-icon">😴</span>
+        <div>
+          <div class="col-name">sleep_hours</div>
+          <div class="col-desc">Average hours of sleep per night</div>
+          <div class="col-range">Range: 4 – 10</div>
+        </div>
+      </div>
+      <div class="col-card">
+        <span class="col-icon">💼</span>
+        <div>
+          <div class="col-name">part_time_job</div>
+          <div class="col-desc">Does the student have a part-time job?</div>
+          <div class="col-range">0 = No &nbsp;|&nbsp; 1 = Yes</div>
+        </div>
+      </div>
+      <div class="col-card">
+        <span class="col-icon">🎭</span>
+        <div>
+          <div class="col-name">extracurriculars</div>
+          <div class="col-desc">Number of extracurricular activities</div>
+          <div class="col-range">Range: 0 – 8</div>
+        </div>
+      </div>
+      <div class="col-card">
+        <span class="col-icon">🏠</span>
+        <div>
+          <div class="col-name">socioeconomic_index</div>
+          <div class="col-desc">Background socioeconomic score</div>
+          <div class="col-range">Range: 1 – 10</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample-row">
+      <p>Example row</p>
+      <code>Alice Njeri, 18, 0.92, 3.4, 90, 4, 7.5, 0, 2, 8</code>
+    </div>
+
+    <div class="guide-footer">
+      <p>💡 Tip: Open the template in <strong>Excel or Google Sheets</strong>, fill in your students, then export as <code>.csv</code> and upload above.</p>
+      <button class="btn btn-ghost btn-sm" onclick="downloadTemplate()">↓ Download template</button>
+    </div>
+  </div>
+
   <!-- EMPTY STATE -->
-  <div id="empty-state" class="empty-state">
+  <div id="empty-state" class="empty-state" style="display:none">
     <span class="big">🎓</span>
     <h2>Upload a class roster to get started</h2>
-    <p>Download the template CSV, fill it in with your students' data, then click Analyze Class.</p>
-    <button class="btn btn-ghost" onclick="downloadTemplate()">↓ Download template CSV</button>
+    <p>Fill in the template above, then drag it into the upload box and click Analyze Class.</p>
   </div>
 
   <!-- RESULTS -->
@@ -633,6 +969,37 @@
             <button class="pill" data-filter="Average" onclick="setFilter('Average', this)">Average</button>
             <button class="pill" data-filter="Pass" onclick="setFilter('Pass', this)">Pass</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TREND TRACKING -->
+    <div class="trend-section" id="trend-section">
+      <div class="trend-header">
+        <div>
+          <h3>📈 Class Trend Over Time</h3>
+          <p>Each upload is saved as a session. Track how your class evolves week by week.</p>
+        </div>
+        <div class="trend-actions">
+          <input class="session-label-input" id="session-label" placeholder="e.g. Week 1, Term 2…" maxlength="30"/>
+          <button class="btn btn-ghost btn-sm" onclick="saveCurrentSession()">+ Save this session</button>
+          <button class="btn btn-ghost btn-sm" onclick="clearHistory()" style="color:var(--risk-red);border-color:rgba(255,77,109,0.3)">Clear history</button>
+        </div>
+      </div>
+
+      <div id="no-history" class="no-history">
+        No sessions saved yet. After analyzing a class, click <strong>"+ Save this session"</strong> to start tracking trends.
+      </div>
+
+      <div id="history-content" style="display:none">
+        <div class="sessions-bar" id="sessions-bar"></div>
+        <div class="trend-summary-chips" id="trend-summary-chips"></div>
+        <div class="trend-chart-wrap">
+          <canvas id="trend-chart"></canvas>
+        </div>
+        <div class="trend-student-list">
+          <h4>Per-student trajectory (latest vs previous)</h4>
+          <div id="trend-student-rows"></div>
         </div>
       </div>
     </div>
@@ -780,6 +1147,8 @@ function renderResults(data) {
   applyFilters();
 
   document.getElementById('results').style.display = 'block';
+  document.getElementById('csv-guide').style.display = 'none';
+  document.getElementById('trend-section').style.display = 'block';
   document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -1015,8 +1384,285 @@ function hideError() {
   document.getElementById('error-box').style.display = 'none';
 }
 
-// Initial state
-document.getElementById('empty-state').style.display = 'block';
+// =============================================
+// TREND TRACKING  (localStorage-backed)
+// =============================================
+const STORAGE_KEY = 'grade_analyzer_sessions';
+let trendChart = null;
+let sessions = [];   // [{label, date, summary, students}]
+
+function loadSessions() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    sessions = raw ? JSON.parse(raw) : [];
+  } catch(e) {
+    sessions = [];
+  }
+}
+
+function saveSessions() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+  } catch(e) {
+    console.warn('Could not save sessions:', e);
+  }
+}
+
+function saveCurrentSession() {
+  if (!allStudents.length) {
+    alert('Please analyze a class first before saving a session.');
+    return;
+  }
+  const label = document.getElementById('session-label').value.trim()
+                || 'Session ' + (sessions.length + 1);
+  const date  = new Date().toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+
+  // Build lightweight snapshot — name + grade + score only
+  const snapshot = allStudents.map(s => ({
+    name:  s.student_name,
+    grade: s.grade,
+    score: s.score,
+  }));
+
+  const gradeCount = { Pass: 0, Average: 0, 'At-Risk': 0 };
+  snapshot.forEach(s => { gradeCount[s.grade] = (gradeCount[s.grade] || 0) + 1; });
+
+  sessions.push({
+    label,
+    date,
+    total: snapshot.length,
+    pass:    gradeCount['Pass'],
+    average: gradeCount['Average'],
+    atRisk:  gradeCount['At-Risk'],
+    passRate: Math.round(gradeCount['Pass'] / Math.max(snapshot.length,1) * 100),
+    students: snapshot,
+  });
+
+  saveSessions();
+  document.getElementById('session-label').value = '';
+  renderTrend();
+  document.getElementById('trend-section')
+    .scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function clearHistory() {
+  if (!confirm('Clear all saved sessions? This cannot be undone.')) return;
+  sessions = [];
+  saveSessions();
+  renderTrend();
+}
+
+function renderTrend() {
+  const noHistory  = document.getElementById('no-history');
+  const histContent = document.getElementById('history-content');
+
+  if (sessions.length === 0) {
+    noHistory.style.display = 'block';
+    histContent.style.display = 'none';
+    return;
+  }
+
+  noHistory.style.display = 'none';
+  histContent.style.display = 'block';
+
+  renderSessionChips();
+  renderTrendSummary();
+  renderTrendChart();
+  renderTrendStudentRows();
+}
+
+function renderSessionChips() {
+  const bar = document.getElementById('sessions-bar');
+  bar.innerHTML = sessions.map((s, i) => `
+    <div class="session-chip active">
+      <span class="chip-dot" style="background:${sessionColor(i)}"></span>
+      <span>${s.label}</span>
+      <span style="opacity:0.5">${s.date}</span>
+      <span onclick="deleteSession(${i})" style="margin-left:2px;opacity:0.5;cursor:pointer"
+            onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.5">✕</span>
+    </div>`).join('');
+}
+
+function deleteSession(i) {
+  sessions.splice(i, 1);
+  saveSessions();
+  renderTrend();
+}
+
+function sessionColor(i) {
+  const colors = ['#00e5a0','#0077ff','#ff4d6d','#ffb830','#a78bfa','#f97316'];
+  return colors[i % colors.length];
+}
+
+function renderTrendSummary() {
+  if (sessions.length < 2) {
+    document.getElementById('trend-summary-chips').innerHTML =
+      '<span style="font-size:12px;color:var(--muted)">Save at least 2 sessions to see trend comparisons.</span>';
+    return;
+  }
+
+  const latest = sessions[sessions.length - 1];
+  const prev   = sessions[sessions.length - 2];
+  const riskDelta = latest.atRisk - prev.atRisk;
+  const passDelta = latest.passRate - prev.passRate;
+
+  const chips = [
+    {
+      cls: riskDelta < 0 ? 'improved' : riskDelta > 0 ? 'declined' : 'stable',
+      val: (riskDelta > 0 ? '+' : '') + riskDelta,
+      label: 'At-Risk vs last session'
+    },
+    {
+      cls: passDelta > 0 ? 'improved' : passDelta < 0 ? 'declined' : 'stable',
+      val: (passDelta > 0 ? '+' : '') + passDelta + '%',
+      label: 'Pass rate vs last session'
+    },
+    {
+      cls: 'stable',
+      val: sessions.length,
+      label: 'sessions tracked'
+    }
+  ];
+
+  document.getElementById('trend-summary-chips').innerHTML = chips.map(c => `
+    <div class="trend-stat ${c.cls}">
+      <span>${c.val}</span>${c.label}
+    </div>`).join('');
+}
+
+function renderTrendChart() {
+  if (trendChart) trendChart.destroy();
+  const ctx = document.getElementById('trend-chart').getContext('2d');
+  const labels  = sessions.map(s => s.label);
+  const atRisk  = sessions.map(s => s.atRisk);
+  const average = sessions.map(s => s.average);
+  const pass    = sessions.map(s => s.pass);
+
+  trendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'At-Risk',
+          data: atRisk,
+          borderColor: '#ff4d6d',
+          backgroundColor: 'rgba(255,77,109,0.1)',
+          tension: 0.4,
+          fill: true,
+          pointBackgroundColor: '#ff4d6d',
+          pointRadius: 5,
+        },
+        {
+          label: 'Average',
+          data: average,
+          borderColor: '#ffb830',
+          backgroundColor: 'rgba(255,184,48,0.06)',
+          tension: 0.4,
+          fill: false,
+          pointBackgroundColor: '#ffb830',
+          pointRadius: 5,
+        },
+        {
+          label: 'Pass',
+          data: pass,
+          borderColor: '#00e5a0',
+          backgroundColor: 'rgba(0,229,160,0.06)',
+          tension: 0.4,
+          fill: false,
+          pointBackgroundColor: '#00e5a0',
+          pointRadius: 5,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: {
+          labels: {
+            color: '#7a7f94',
+            font: { size: 11 },
+            boxWidth: 10,
+          }
+        },
+        tooltip: {
+          backgroundColor: '#14171f',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          titleColor: '#e8eaf0',
+          bodyColor: '#7a7f94',
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#7a7f94', font: { size: 11 } },
+          grid:  { color: 'rgba(255,255,255,0.04)' },
+        },
+        y: {
+          ticks: { color: '#7a7f94', font: { size: 11 }, stepSize: 1 },
+          grid:  { color: 'rgba(255,255,255,0.04)' },
+          beginAtZero: true,
+        }
+      }
+    }
+  });
+}
+
+function renderTrendStudentRows() {
+  if (sessions.length < 2) {
+    document.getElementById('trend-student-rows').innerHTML =
+      '<p style="font-size:12px;color:var(--muted)">Save 2 or more sessions to see per-student trajectory.</p>';
+    return;
+  }
+
+  // Build a map of all students ever seen
+  const allNames = [...new Set(sessions.flatMap(s => s.students.map(st => st.name)))].sort();
+  const gradeVal = { 'Pass': 2, 'Average': 1, 'At-Risk': 0 };
+
+  const rows = allNames.map(name => {
+    const history = sessions.map(sess => {
+      const found = sess.students.find(st => st.name === name);
+      return found || null;
+    });
+
+    const latest = history[history.length - 1];
+    const prev   = history[history.length - 2];
+
+    let arrow = '→', arrowCls = 'flat';
+    if (latest && prev) {
+      const diff = (gradeVal[latest.grade] || 0) - (gradeVal[prev?.grade] || 0);
+      if (diff > 0)      { arrow = '↑'; arrowCls = 'up'; }
+      else if (diff < 0) { arrow = '↓'; arrowCls = 'down'; }
+    }
+
+    const dots = history.map((h, i) => {
+      if (!h) return `<div class="trend-grade-dot missing" title="Session ${i+1}: not in upload">–</div>`;
+      const abbr = h.grade === 'At-Risk' ? 'AR' : h.grade === 'Average' ? 'AV' : 'P';
+      return `<div class="trend-grade-dot ${h.grade}" title="${sessions[i].label}: ${h.grade} (${h.score})">${abbr}</div>`;
+    }).join('');
+
+    return `
+      <div class="trend-student-row">
+        <span class="trend-name">${name}</span>
+        <div class="trend-chips">${dots}</div>
+        <span class="trend-arrow ${arrowCls}">${arrow}</span>
+      </div>`;
+  }).join('');
+
+  document.getElementById('trend-student-rows').innerHTML = rows;
+}
+
+// =============================================
+// INITIAL STATE
+// =============================================
+loadSessions();
+renderTrend();
+
+// Initial state — show guide, hide empty state placeholder
+document.getElementById('empty-state').style.display = 'none';
+document.getElementById('csv-guide').style.display = 'block';
 </script>
 </body>
 </html>

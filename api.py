@@ -249,9 +249,34 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Predictive Grade Analyzer API",
-    description="ML pipeline predicting student performance using XGBoost and MLP",
+    description="""
+## 🎓 Predictive Grade Analyzer
+
+An ML pipeline that predicts student academic performance using **XGBoost** and **MLP Neural Networks**.
+
+### Features
+- **Single prediction** — predict one student's grade with SHAP explanation
+- **Batch prediction** — upload a class CSV and get risk analysis for every student
+- **Intervention suggestions** — actionable advice for at-risk students
+- **Two models** — XGBoost (78.75% accuracy) and MLP Neural Network (81.25% accuracy)
+
+### Grade Categories
+| Grade | Description |
+|-------|-------------|
+| `Pass` | Top 35% performers |
+| `Average` | Middle 40% performers |
+| `At-Risk` | Bottom 25% — needs intervention |
+    """,
     version="1.0.0",
     lifespan=lifespan,
+    contact={
+        "name": "Victor Morara",
+        "url": "https://github.com/Morasho",
+        "email": "moraravictor9@gmail.com",
+    },
+    license_info={
+        "name": "MIT",
+    },
 )
 
 
@@ -305,21 +330,38 @@ async def dashboard():
     return FileResponse(str(dashboard_path))
 
 
-@app.get("/health")
+@app.get("/health", summary="Health check", tags=["System"])
 async def health():
+    """Check API status and which models are currently loaded."""
     return {
         "status": "ok",
         "models_loaded": list(models.keys()),
     }
 
 
-@app.get("/models")
+@app.get("/models", summary="List available models", tags=["System"])
 async def list_models():
+    """Returns the list of ML models currently loaded and ready for predictions."""
     return {"available": list(models.keys())}
 
 
-@app.post("/predict")
+@app.post(
+    "/predict",
+    summary="Predict single student performance",
+    tags=["Prediction"],
+    response_description="Grade prediction with confidence scores and SHAP explanation",
+)
 async def predict(data: StudentInput):
+    """
+    Predict a single student's academic performance.
+
+    Returns:
+    - **grade**: `Pass`, `Average`, or `At-Risk`
+    - **score**: Predicted score out of 100
+    - **confidence**: Probability breakdown across all three classes
+    - **explanation**: Top SHAP factors helping and hurting the prediction
+    - **model_used**: Which model produced the result
+    """
     payload = data.model_dump()
     payload.pop("model_name")
     return run_prediction(payload, data.model_name.lower())
@@ -327,12 +369,26 @@ async def predict(data: StudentInput):
 
 # ── Batch prediction ──────────────────────────────────────────────────────────
 
-@app.post("/predict-batch")
+@app.post(
+    "/predict-batch",
+    summary="Predict performance for a whole class",
+    tags=["Prediction"],
+    response_description="Class summary with per-student predictions, SHAP factors and interventions",
+)
 async def predict_batch(file: UploadFile = File(...), model_name: str = "xgboost"):
     """
-    Accept a CSV file with one student per row.
-    Returns JSON with a class-level summary and per-student
-    prediction + SHAP explanation + intervention suggestions.
+    Upload a CSV file with one student per row to get predictions for the entire class.
+
+    **Required CSV columns:**
+    `student_name` *(optional)*, `study_hours_per_week`, `attendance_rate`, `previous_gpa`,
+    `assignments_completed`, `tutoring_sessions`, `sleep_hours`, `part_time_job`,
+    `extracurriculars`, `socioeconomic_index`
+
+    **Download a template:** `GET /predict-batch/template`
+
+    Returns:
+    - **summary**: Class-wide grade distribution and pass rate
+    - **students**: Per-student predictions, confidence scores, SHAP factors and intervention suggestions
     """
     # 1. Parse the CSV
     try:
@@ -414,9 +470,16 @@ async def predict_batch(file: UploadFile = File(...), model_name: str = "xgboost
     return {"summary": summary, "students": results}
 
 
-@app.get("/predict-batch/template")
+@app.get(
+    "/predict-batch/template",
+    summary="Download CSV template",
+    tags=["Prediction"],
+)
 async def batch_template():
-    """Download a blank CSV template educators can fill in."""
+    """
+    Download a blank CSV template with the correct column headers and two sample rows.
+    Fill this in with your class data and upload to `/predict-batch`.
+    """
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow(["student_name"] + REQUIRED_FEATURES)

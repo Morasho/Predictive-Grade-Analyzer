@@ -1,0 +1,72 @@
+# ── Virtual environment ───────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Python cache ──────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+
+# ── Distribution / packaging ──────────────────────────────
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# ── Testing ───────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+*.test
+
+# ── Jupyter notebooks checkpoints ────────────────────────
+.ipynb_checkpoints/
+
+# ── Environment variables ─────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── OS junk ───────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE / editor ─────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ── Logs ─────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Outputs — keep model files, ignore plots ─────────────
+# Model .pkl files ARE included (Render needs them to run)
+outputs/*.png
+outputs/*.jpg
+outputs/*.jpeg
+
+# ── Data — keep the CSV, ignore large generated files ─────
+# data/students.csv IS included (needed to retrain)
+data/*.parquet
+data/*.h5
+
+# ── Temporary scripts (debugging helpers) ────────────────
+debug_model.py
+debug_explain.py
+fix_retrain.py
+fix_mlp_labels.py
+fix_mlp_final.py
+fix_mlp_regressor.py
+save_mlp_scaler.py
