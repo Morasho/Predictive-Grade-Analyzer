@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Educator Dashboard — Predictive Grade Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #14171f;
+    --surface2: #1c2030;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8eaf0;
+    --muted: #7a7f94;
+    --accent: #00e5a0;
+    --accent2: #0077ff;
+    --risk-red: #ff4d6d;
+    --risk-amber: #ffb830;
+    --risk-green: #00e5a0;
+    --risk-red-bg: rgba(255,77,109,0.1);
+    --risk-amber-bg: rgba(255,184,48,0.1);
+    --risk-green-bg: rgba(0,229,160,0.1);
+    --font: 'Sora', sans-serif;
+    --mono: 'DM Mono', monospace;
+    --radius: 12px;
+    --radius-lg: 18px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ---- NAV ---- */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 40px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 8px; }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    transition: all .2s;
+  }
+  .nav-links a:hover { color: var(--text); background: var(--surface2); }
+  .nav-links a.active { color: var(--accent); background: rgba(0,229,160,0.08); }
+
+  /* ---- LAYOUT ---- */
+  .page { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+
+  .page-header { margin-bottom: 36px; }
+  .page-header h1 {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+  .page-header p { color: var(--muted); font-size: 13px; }
+
+  /* ---- UPLOAD ZONE ---- */
+  .upload-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    margin-bottom: 28px;
+  }
+  .upload-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 16px;
+    align-items: start;
+  }
+  .dropzone {
+    border: 1.5px dashed var(--border2);
+    border-radius: var(--radius);
+    padding: 36px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    background: var(--surface2);
+    position: relative;
+  }
+  .dropzone:hover, .dropzone.drag-over {
+    border-color: var(--accent);
+    background: rgba(0,229,160,0.04);
+  }
+  .dropzone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .drop-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+    display: block;
+  }
+  .drop-title { font-weight: 500; font-size: 14px; margin-bottom: 4px; }
+  .drop-sub { color: var(--muted); font-size: 12px; }
+  .drop-filename {
+    margin-top: 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    display: none;
+  }
+
+  .upload-options {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 160px;
+  }
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 6px;
+  }
+  .field select, .field input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-family: var(--font);
+    font-size: 13px;
+    outline: none;
+    transition: border-color .2s;
+    appearance: none;
+  }
+  .field select:focus, .field input:focus { border-color: var(--accent); }
+
+  .upload-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: flex-start;
+    padding-top: 28px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 10px 20px;
+    border-radius: 9px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all .18s;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #0d0f14;
+  }
+  .btn-primary:hover { background: #00ffb3; transform: translateY(-1px); }
+  .btn-primary:disabled { background: var(--surface2); color: var(--muted); cursor: not-allowed; transform: none; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border2);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
+  .btn-sm { padding: 7px 14px; font-size: 12px; }
+
+  /* ---- LOADING ---- */
+  #loading {
+    display: none;
+    text-align: center;
+    padding: 48px 24px;
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 2.5px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loading p { color: var(--muted); font-size: 13px; }
+
+  /* ---- ERROR ---- */
+  .error-box {
+    background: rgba(255,77,109,0.08);
+    border: 1px solid rgba(255,77,109,0.25);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    color: var(--risk-red);
+    font-size: 13px;
+    display: none;
+    margin-top: 16px;
+  }
+
+  /* ---- RESULTS ---- */
+  #results { display: none; }
+
+  /* ---- SUMMARY CARDS ---- */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .stat-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-bottom: 4px;
+    font-family: var(--mono);
+  }
+  .stat-sub { font-size: 12px; color: var(--muted); }
+  .stat-card.danger .stat-value { color: var(--risk-red); }
+  .stat-card.warning .stat-value { color: var(--risk-amber); }
+  .stat-card.success .stat-value { color: var(--risk-green); }
+
+  /* ---- CHART + FILTER ROW ---- */
+  .dashboard-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 18px;
+    margin-bottom: 24px;
+    align-items: start;
+  }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .chart-card h3 {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 16px;
+  }
+  .chart-wrap { position: relative; height: 160px; }
+
+  /* ---- FILTERS ---- */
+  .filter-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .filter-card h3 {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 14px;
+  }
+  .filter-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .filter-row input[type="text"] {
+    flex: 1;
+    min-width: 160px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-family: var(--font);
+    font-size: 13px;
+    outline: none;
+  }
+  .filter-row input[type="text"]:focus { border-color: var(--accent); }
+  .filter-pills { display: flex; gap: 6px; }
+  .pill {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1.5px solid var(--border2);
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font);
+    transition: all .15s;
+  }
+  .pill.active-all { border-color: var(--text); color: var(--text); }
+  .pill.active-risk { border-color: var(--risk-red); color: var(--risk-red); background: var(--risk-red-bg); }
+  .pill.active-avg { border-color: var(--risk-amber); color: var(--risk-amber); background: var(--risk-amber-bg); }
+  .pill.active-pass { border-color: var(--risk-green); color: var(--risk-green); background: var(--risk-green-bg); }
+
+  /* ---- TABLE ---- */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .table-header h3 { font-size: 14px; font-weight: 600; }
+  .table-count { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left;
+    padding: 10px 20px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  thead th:hover { color: var(--text); }
+  thead th .sort-arrow { font-size: 10px; margin-left: 4px; opacity: 0.5; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .12s;
+    cursor: pointer;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+  tbody tr.expanded { background: var(--surface2); }
+  td { padding: 13px 20px; font-size: 13px; vertical-align: middle; }
+
+  .grade-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--mono);
+    letter-spacing: 0.3px;
+  }
+  .grade-badge.At-Risk { background: var(--risk-red-bg); color: var(--risk-red); border: 1px solid rgba(255,77,109,0.25); }
+  .grade-badge.Average { background: var(--risk-amber-bg); color: var(--risk-amber); border: 1px solid rgba(255,184,48,0.25); }
+  .grade-badge.Pass { background: var(--risk-green-bg); color: var(--risk-green); border: 1px solid rgba(0,229,160,0.25); }
+  .grade-badge.Error { background: rgba(122,127,148,0.1); color: var(--muted); }
+
+  .conf-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .conf-bar { height: 4px; border-radius: 2px; flex: 1; background: var(--surface2); overflow: hidden; }
+  .conf-bar-fill { height: 100%; border-radius: 2px; }
+  .conf-val { font-family: var(--mono); font-size: 11px; color: var(--muted); min-width: 36px; }
+
+  .expand-row td {
+    padding: 0;
+    background: rgba(255,255,255,0.015);
+  }
+  .expand-inner {
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ---- SHAP FACTORS ---- */
+  .shap-section h4 {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+  }
+  .shap-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .shap-label { font-size: 12px; color: var(--text); min-width: 130px; }
+  .shap-track { flex: 1; height: 6px; background: var(--surface); border-radius: 3px; overflow: hidden; }
+  .shap-fill { height: 100%; border-radius: 3px; }
+  .shap-fill.help { background: var(--risk-green); }
+  .shap-fill.hurt { background: var(--risk-red); }
+  .shap-val { font-family: var(--mono); font-size: 11px; min-width: 40px; text-align: right; }
+
+  /* ---- INTERVENTIONS ---- */
+  .interventions-section h4 {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+  }
+  .intervention-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .int-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+  .int-dot.high { background: var(--risk-red); }
+  .int-dot.medium { background: var(--risk-amber); }
+  .int-dot.info { background: var(--risk-green); }
+  .int-body { font-size: 12px; line-height: 1.5; }
+  .int-feature { font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .int-advice { color: var(--muted); }
+
+  /* ---- EXPORT ---- */
+  .export-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    margin-bottom: 20px;
+  }
+  .export-bar p { font-size: 13px; color: var(--muted); }
+  .export-bar p strong { color: var(--text); }
+
+  /* ---- EMPTY STATE ---- */
+  .empty-state {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--muted);
+  }
+  .empty-state .big { font-size: 40px; margin-bottom: 16px; display: block; }
+  .empty-state h2 { font-size: 17px; font-weight: 500; color: var(--text); margin-bottom: 8px; }
+  .empty-state p { font-size: 13px; max-width: 340px; margin: 0 auto 20px; }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 768px) {
+    nav { padding: 14px 16px; }
+    .page { padding: 24px 16px; }
+    .upload-row { grid-template-columns: 1fr; }
+    .upload-actions { flex-direction: row; padding-top: 0; }
+    .summary-grid { grid-template-columns: 1fr 1fr; }
+    .dashboard-row { grid-template-columns: 1fr; }
+    .expand-inner { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <span>▲</span> Grade Analyzer
+  </div>
+  <div class="nav-links">
+    <a href="/">Single Student</a>
+    <a href="/dashboard" class="active">Class Dashboard</a>
+    <a href="/docs" target="_blank">API Docs</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="page-header">
+    <h1>Educator Dashboard</h1>
+    <p>Upload your class roster CSV to get risk predictions, SHAP explanations, and intervention suggestions for every student.</p>
+  </div>
+
+  <!-- UPLOAD SECTION -->
+  <div class="upload-section">
+    <div class="upload-row">
+      <!-- Dropzone -->
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="csv-file" accept=".csv"/>
+        <span class="drop-icon">📂</span>
+        <div class="drop-title">Drop your CSV here or click to browse</div>
+        <div class="drop-sub">One row per student · Max 500 students</div>
+        <div class="drop-filename" id="drop-filename"></div>
+      </div>
+
+      <!-- Options -->
+      <div class="upload-options">
+        <div class="field">
+          <label>Model</label>
+          <select id="model-select">
+            <option value="xgboost">XGBoost</option>
+            <option value="mlp">MLP Neural Net</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Sort results by</label>
+          <select id="sort-select">
+            <option value="risk">Risk level first</option>
+            <option value="name">Student name</option>
+            <option value="score">Score</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="upload-actions">
+        <button class="btn btn-primary" id="run-btn" disabled onclick="runPrediction()">
+          ▶ Analyze Class
+        </button>
+        <button class="btn btn-ghost" onclick="downloadTemplate()">
+          ↓ Template CSV
+        </button>
+      </div>
+    </div>
+
+    <div class="error-box" id="error-box"></div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <p id="loading-msg">Analyzing students...</p>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div id="empty-state" class="empty-state">
+    <span class="big">🎓</span>
+    <h2>Upload a class roster to get started</h2>
+    <p>Download the template CSV, fill it in with your students' data, then click Analyze Class.</p>
+    <button class="btn btn-ghost" onclick="downloadTemplate()">↓ Download template CSV</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+
+    <!-- Summary Stats -->
+    <div class="summary-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Students</div>
+        <div class="stat-value" id="stat-total">—</div>
+        <div class="stat-sub">in this upload</div>
+      </div>
+      <div class="stat-card danger">
+        <div class="stat-label">At-Risk</div>
+        <div class="stat-value" id="stat-risk">—</div>
+        <div class="stat-sub" id="stat-risk-pct">need immediate attention</div>
+      </div>
+      <div class="stat-card warning">
+        <div class="stat-label">Average</div>
+        <div class="stat-value" id="stat-avg">—</div>
+        <div class="stat-sub">borderline performers</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-label">Passing</div>
+        <div class="stat-value" id="stat-pass">—</div>
+        <div class="stat-sub" id="stat-pass-pct">—</div>
+      </div>
+    </div>
+
+    <!-- Chart + Filters row -->
+    <div class="dashboard-row">
+      <div class="chart-card">
+        <h3>Distribution</h3>
+        <div class="chart-wrap">
+          <canvas id="donut-chart"></canvas>
+        </div>
+      </div>
+      <div class="filter-card">
+        <h3>Filter & Search</h3>
+        <div class="filter-row">
+          <input type="text" id="search-box" placeholder="Search by student name..." oninput="applyFilters()"/>
+          <div class="filter-pills">
+            <button class="pill active-all" data-filter="all" onclick="setFilter('all', this)">All</button>
+            <button class="pill" data-filter="At-Risk" onclick="setFilter('At-Risk', this)">At-Risk</button>
+            <button class="pill" data-filter="Average" onclick="setFilter('Average', this)">Average</button>
+            <button class="pill" data-filter="Pass" onclick="setFilter('Pass', this)">Pass</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export bar -->
+    <div class="export-bar">
+      <p>Showing <strong id="showing-count">—</strong> students · <strong id="model-used-label">—</strong></p>
+      <button class="btn btn-ghost btn-sm" onclick="exportCSV()">↓ Export results CSV</button>
+    </div>
+
+    <!-- Heatmap Table -->
+    <div class="table-card">
+      <div class="table-header">
+        <h3>Student Risk Heatmap</h3>
+        <span class="table-count" id="table-count">0 students</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortBy('student_name')">Student <span class="sort-arrow">↕</span></th>
+            <th onclick="sortBy('grade')">Risk Level <span class="sort-arrow">↕</span></th>
+            <th onclick="sortBy('score')">Score <span class="sort-arrow">↕</span></th>
+            <th>Confidence</th>
+            <th>Top Risk Factor</th>
+            <th>Interventions</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+
+  </div><!-- /results -->
+
+</div><!-- /page -->
+
+<script>
+// =============================================
+// STATE
+// =============================================
+let allStudents = [];
+let filteredStudents = [];
+let currentFilter = 'all';
+let currentSort = { key: 'grade', dir: 'desc' };
+let donutChart = null;
+
+const gradeOrder = { 'At-Risk': 0, 'Average': 1, 'Pass': 2, 'Error': 3 };
+
+// =============================================
+// FILE HANDLING
+// =============================================
+const csvInput = document.getElementById('csv-file');
+const dropzone = document.getElementById('dropzone');
+const runBtn = document.getElementById('run-btn');
+const filenameEl = document.getElementById('drop-filename');
+
+csvInput.addEventListener('change', () => {
+  if (csvInput.files[0]) {
+    filenameEl.textContent = '✓ ' + csvInput.files[0].name;
+    filenameEl.style.display = 'block';
+    runBtn.disabled = false;
+  }
+});
+
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f && f.name.endsWith('.csv')) {
+    const dt = new DataTransfer();
+    dt.items.add(f);
+    csvInput.files = dt.files;
+    filenameEl.textContent = '✓ ' + f.name;
+    filenameEl.style.display = 'block';
+    runBtn.disabled = false;
+  }
+});
+
+// =============================================
+// PREDICTION
+// =============================================
+async function runPrediction() {
+  const file = csvInput.files[0];
+  if (!file) return;
+
+  const model = document.getElementById('model-select').value;
+
+  showLoading(true);
+  hideError();
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('empty-state').style.display = 'none';
+
+  const form = new FormData();
+  form.append('file', file);
+
+  try {
+    setLoadingMsg('Uploading class roster...');
+    const res = await fetch(`/predict-batch?model_name=${model}`, {
+      method: 'POST',
+      body: form
+    });
+
+    setLoadingMsg('Running predictions...');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Server error' }));
+      throw new Error(err.detail || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    setLoadingMsg('Rendering results...');
+    await new Promise(r => setTimeout(r, 200));
+
+    allStudents = data.students || [];
+    renderResults(data);
+
+  } catch (err) {
+    showError('Error: ' + err.message);
+    document.getElementById('empty-state').style.display = 'block';
+  } finally {
+    showLoading(false);
+  }
+}
+
+// =============================================
+// RENDER
+// =============================================
+function renderResults(data) {
+  const summary = data.summary;
+
+  // Stat cards
+  document.getElementById('stat-total').textContent = summary.total_students;
+  document.getElementById('stat-risk').textContent = summary.grade_distribution['At-Risk'] || 0;
+  document.getElementById('stat-avg').textContent = summary.grade_distribution['Average'] || 0;
+  document.getElementById('stat-pass').textContent = summary.grade_distribution['Pass'] || 0;
+  document.getElementById('stat-pass-pct').textContent = summary.pass_rate + '% pass rate';
+  const riskPct = Math.round((summary.grade_distribution['At-Risk'] || 0) / Math.max(summary.total_students,1) * 100);
+  document.getElementById('stat-risk-pct').textContent = riskPct + '% of class';
+  document.getElementById('model-used-label').textContent = 'Model: ' + summary.model_used.toUpperCase();
+
+  // Donut chart
+  renderDonut(summary.grade_distribution);
+
+  // Apply sort + filter + render table
+  applyFilters();
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderDonut(dist) {
+  if (donutChart) donutChart.destroy();
+  const ctx = document.getElementById('donut-chart').getContext('2d');
+  donutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['At-Risk', 'Average', 'Pass'],
+      datasets: [{
+        data: [dist['At-Risk'] || 0, dist['Average'] || 0, dist['Pass'] || 0],
+        backgroundColor: ['rgba(255,77,109,0.85)', 'rgba(255,184,48,0.85)', 'rgba(0,229,160,0.85)'],
+        borderColor: ['#ff4d6d', '#ffb830', '#00e5a0'],
+        borderWidth: 1.5,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      cutout: '68%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.label}: ${ctx.raw} students`
+          }
+        }
+      },
+      animation: { duration: 600 }
+    }
+  });
+}
+
+// =============================================
+// FILTER + SORT
+// =============================================
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.pill').forEach(p => {
+    p.className = 'pill';
+    if (p.dataset.filter === f) {
+      if (f === 'all') p.classList.add('active-all');
+      else if (f === 'At-Risk') p.classList.add('active-risk');
+      else if (f === 'Average') p.classList.add('active-avg');
+      else if (f === 'Pass') p.classList.add('active-pass');
+    }
+  });
+  applyFilters();
+}
+
+function applyFilters() {
+  const q = document.getElementById('search-box').value.toLowerCase();
+  filteredStudents = allStudents.filter(s => {
+    const matchFilter = currentFilter === 'all' || s.grade === currentFilter;
+    const matchSearch = !q || s.student_name.toLowerCase().includes(q);
+    return matchFilter && matchSearch;
+  });
+
+  sortStudents();
+  renderTable();
+}
+
+function sortBy(key) {
+  if (currentSort.key === key) currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+  else { currentSort.key = key; currentSort.dir = key === 'grade' ? 'asc' : 'desc'; }
+  sortStudents();
+  renderTable();
+}
+
+function sortStudents() {
+  const { key, dir } = currentSort;
+  filteredStudents.sort((a, b) => {
+    let av = key === 'grade' ? gradeOrder[a.grade] : (key === 'student_name' ? a.student_name : a.score);
+    let bv = key === 'grade' ? gradeOrder[b.grade] : (key === 'student_name' ? b.student_name : b.score);
+    if (typeof av === 'string') return dir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+    return dir === 'asc' ? av - bv : bv - av;
+  });
+}
+
+// =============================================
+// TABLE RENDERING
+// =============================================
+function renderTable() {
+  const tbody = document.getElementById('table-body');
+  document.getElementById('table-count').textContent = filteredStudents.length + ' students';
+  document.getElementById('showing-count').textContent = filteredStudents.length;
+
+  if (filteredStudents.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No students match the current filter.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filteredStudents.map((s, i) => {
+    const gradeClass = s.grade.replace(' ', '-');
+    const topHurting = (s.shap_factors?.hurting || [])[0];
+    const topFactor = topHurting ? topHurting.label : '—';
+    const confVal = s.confidence?.[s.grade] || 0;
+    const intCount = s.interventions?.length || 0;
+
+    let confColor = '#00e5a0';
+    if (s.grade === 'At-Risk') confColor = '#ff4d6d';
+    else if (s.grade === 'Average') confColor = '#ffb830';
+
+    return `
+      <tr onclick="toggleExpand(${i})" id="row-${i}">
+        <td><strong>${s.student_name}</strong></td>
+        <td><span class="grade-badge ${gradeClass}">${s.grade === 'At-Risk' ? '⚠ ' : s.grade === 'Pass' ? '✓ ' : '~ '}${s.grade}</span></td>
+        <td><span style="font-family:var(--mono);font-weight:500">${s.score}</span></td>
+        <td>
+          <div class="conf-bar-wrap">
+            <div class="conf-bar"><div class="conf-bar-fill" style="width:${confVal}%;background:${confColor}"></div></div>
+            <span class="conf-val">${confVal.toFixed(0)}%</span>
+          </div>
+        </td>
+        <td style="color:var(--muted);font-size:12px">${topFactor}</td>
+        <td style="font-family:var(--mono);font-size:12px;color:${intCount > 0 ? 'var(--risk-amber)' : 'var(--muted)'}">${intCount > 0 ? intCount + ' action' + (intCount > 1 ? 's' : '') : '—'}</td>
+      </tr>
+      <tr class="expand-row" id="expand-${i}" style="display:none">
+        <td colspan="6">
+          <div class="expand-inner">
+            ${renderShap(s)}
+            ${renderInterventions(s)}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function toggleExpand(i) {
+  const expandRow = document.getElementById(`expand-${i}`);
+  const mainRow = document.getElementById(`row-${i}`);
+  const isOpen = expandRow.style.display !== 'none';
+  expandRow.style.display = isOpen ? 'none' : 'table-row';
+  mainRow.classList.toggle('expanded', !isOpen);
+}
+
+function renderShap(s) {
+  const helping = (s.shap_factors?.helping || []).slice(0, 3);
+  const hurting = (s.shap_factors?.hurting || []).slice(0, 3);
+  if (!helping.length && !hurting.length) return `<div class="shap-section"><h4>SHAP Factors</h4><p style="color:var(--muted);font-size:12px">No explanation available.</p></div>`;
+
+  const maxVal = Math.max(
+    ...helping.map(f => Math.abs(f.shap_value || 0)),
+    ...hurting.map(f => Math.abs(f.shap_value || 0)),
+    0.01
+  );
+
+  const helpHtml = helping.map(f => `
+    <div class="shap-item">
+      <span class="shap-label">✓ ${f.label}</span>
+      <div class="shap-track"><div class="shap-fill help" style="width:${Math.abs(f.shap_value)/maxVal*100}%"></div></div>
+      <span class="shap-val" style="color:var(--risk-green)">+${f.shap_value.toFixed(3)}</span>
+    </div>`).join('');
+
+  const hurtHtml = hurting.map(f => `
+    <div class="shap-item">
+      <span class="shap-label">✗ ${f.label}</span>
+      <div class="shap-track"><div class="shap-fill hurt" style="width:${Math.abs(f.shap_value)/maxVal*100}%"></div></div>
+      <span class="shap-val" style="color:var(--risk-red)">${f.shap_value.toFixed(3)}</span>
+    </div>`).join('');
+
+  return `
+    <div class="shap-section">
+      <h4>SHAP Factors</h4>
+      ${helpHtml}${hurtHtml}
+    </div>`;
+}
+
+function renderInterventions(s) {
+  const items = s.interventions || [];
+  if (!items.length) return `<div class="interventions-section"><h4>Interventions</h4><p style="color:var(--muted);font-size:12px">No interventions needed.</p></div>`;
+
+  const html = items.map(i => `
+    <div class="intervention-item">
+      <div class="int-dot ${i.priority}"></div>
+      <div class="int-body">
+        <div class="int-feature">${i.feature}</div>
+        <div class="int-advice">${i.advice}</div>
+      </div>
+    </div>`).join('');
+
+  return `<div class="interventions-section"><h4>Recommended Interventions</h4>${html}</div>`;
+}
+
+// =============================================
+// EXPORT
+// =============================================
+function exportCSV() {
+  if (!filteredStudents.length) return;
+  const rows = [['Student Name','Grade','Score','Pass %','Average %','At-Risk %','Top Helping Factor','Top Hurting Factor','Interventions']];
+  filteredStudents.forEach(s => {
+    rows.push([
+      s.student_name,
+      s.grade,
+      s.score,
+      (s.confidence?.Pass || 0).toFixed(1),
+      (s.confidence?.Average || 0).toFixed(1),
+      (s.confidence?.['At-Risk'] || 0).toFixed(1),
+      (s.shap_factors?.helping || [])[0]?.label || '',
+      (s.shap_factors?.hurting || [])[0]?.label || '',
+      (s.interventions || []).map(i => i.advice).join(' | ')
+    ]);
+  });
+
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'grade_predictions.csv';
+  a.click();
+}
+
+function downloadTemplate() {
+  window.open('/predict-batch/template', '_blank');
+}
+
+// =============================================
+// UI HELPERS
+// =============================================
+function showLoading(show) {
+  document.getElementById('loading').style.display = show ? 'block' : 'none';
+}
+function setLoadingMsg(msg) {
+  document.getElementById('loading-msg').textContent = msg;
+}
+function showError(msg) {
+  const el = document.getElementById('error-box');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideError() {
+  document.getElementById('error-box').style.display = 'none';
+}
+
+// Initial state
+document.getElementById('empty-state').style.display = 'block';
+</script>
+</body>
+</html>

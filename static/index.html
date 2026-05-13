@@ -30,6 +30,31 @@
 
   .container { max-width: 900px; margin: 0 auto; }
 
+  /* ── Nav bar ── */
+  .nav {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1.5rem;
+  }
+  .nav a {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    text-decoration: none;
+    background: rgba(27,153,139,.12);
+    border: 1px solid var(--accent);
+    color: var(--accent2);
+    font-size: .85rem;
+    font-weight: 600;
+    padding: .45rem 1rem;
+    border-radius: var(--radius);
+    transition: background .2s, transform .1s;
+  }
+  .nav a:hover {
+    background: rgba(27,153,139,.25);
+    transform: translateY(-1px);
+  }
+
   /* Header */
   header { text-align: center; margin-bottom: 2.5rem; }
   header h1 {
@@ -186,6 +211,11 @@
 </head>
 <body>
 <div class="container">
+
+  <!-- Nav -->
+  <div class="nav">
+    <a href="/dashboard">🏫 Educator Dashboard →</a>
+  </div>
 
   <header>
     <h1>🎓 Predictive Grade Analyzer</h1>
@@ -345,17 +375,13 @@ async function runPrediction() {
 }
 
 function renderResults(data) {
-  // Grade badge
   const badge = document.getElementById("gradeBadge");
-  const gradeClass = (data.grade || "").replace("-", "-");
   badge.textContent = data.grade;
   badge.className = `grade-badge grade-${data.grade}`;
 
-  // Score
   document.getElementById("scoreVal").textContent = data.score.toFixed(1);
   document.getElementById("modelUsed").textContent = data.model_used.toUpperCase();
 
-  // Confidence bars
   const confDiv = document.getElementById("confidenceBars");
   confDiv.innerHTML = "";
   const conf = data.confidence;
@@ -371,7 +397,6 @@ function renderResults(data) {
       </div>`;
   }
 
-  // SHAP factors
   const expl = data.explanation?.top_factors;
   if (expl) {
     renderFactors("helpingFactors", expl.helping || []);
